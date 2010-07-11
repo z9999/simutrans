@@ -3995,6 +3995,8 @@ void karte_t::laden(loadsave_t *file)
 {
 	char buf[80];
 
+	bool do_remove_goods = event_get_last_control_shift()==3 ? true : false;
+
 	intr_disable();
 	for(  uint i=0;  i<MAX_PLAYER_COUNT;  i++  ) {
 		werkzeug[i] = werkzeug_t::general_tool[WKZ_ABFRAGE];
@@ -4423,7 +4425,12 @@ DBG_MESSAGE("karte_t::laden()", "%d ways loaded",weg_t::get_alle_wege().get_coun
 		if((hnr++%64)==0) {
 			display_progress(get_groesse_y()+48+stadt.get_count()+128+(hnr*40)/hmax, get_groesse_y()+256+stadt.get_count());
 		}
-		(*i)->reroute_goods(dummy);
+		if(!do_remove_goods) {
+			(*i)->reroute_goods(dummy);
+		}
+		else {
+			(*i)->remove_all_goods();
+		}
 	}
 #ifdef DEBUG
 	DBG_MESSAGE("reroute_goods()","for all haltstellen_t took %ld ms", dr_time()-dt );

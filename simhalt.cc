@@ -2772,3 +2772,18 @@ void haltestelle_t::release_factory_links()
 	}
 	fab_list.clear();
 }
+
+void haltestelle_t::remove_all_goods()
+{
+	if (!self.is_bound()) {
+		return;
+	}
+	// remove all goods from halt
+	for(uint8 i=0; i<warenbauer_t::get_max_catg_index(); i++) {
+		vector_tpl<ware_t> * warray = waren[i];
+		if (warray) {
+			delete waren[i];
+			waren[i] = NULL;
+		}
+	}
+}

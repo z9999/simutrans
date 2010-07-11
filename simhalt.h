@@ -645,5 +645,6 @@ public:
 	 */
 	static void init_markers();
 
+	void remove_all_goods();
 };
 #endif
