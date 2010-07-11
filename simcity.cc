@@ -1468,11 +1468,7 @@ void stadt_t::step_passagiere()
 
 			// check, if they can walk there?
 			if (can_walk_ziel) {
-				// so we have happy passengers
-				start_halt->add_pax_happy(pax_left_to_do);
-				merke_passagier_ziel(ziel, COL_YELLOW);
-				city_history_year[0][history_type] += pax_left_to_do;
-				city_history_month[0][history_type] += pax_left_to_do;
+				// do nothing
 				continue;
 			}
 
@@ -1612,6 +1608,7 @@ koord stadt_t::get_zufallspunkt() const
 koord stadt_t::finde_passagier_ziel(pax_zieltyp* will_return)
 {
 	const sint16 rand = simrand(100);
+	sint32 basis = max(max(70, get_minimum_city_distance()*2+6), (welt->get_groesse_x() + welt->get_groesse_y())>>3);
 
 	// about 1/3 are workers
 	if(  rand < welt->get_einstellungen()->get_factory_worker_percentage()  &&  arbeiterziele.get_sum_weight() > 0  ) {
@@ -1621,16 +1618,48 @@ koord stadt_t::finde_passagier_ziel(pax_zieltyp* will_return)
 	} else if(  rand < welt->get_einstellungen()->get_tourist_percentage() + welt->get_einstellungen()->get_factory_worker_percentage()  &&  welt->get_ausflugsziele().get_sum_weight() > 0  ) {
 		*will_return = tourist_return;	// tourists will return
 		const gebaeude_t* gb = welt->get_random_ausflugsziel();
-		return gb->get_pos().get_2d();
+		koord k = gb->get_pos().get_2d();
+		// we like nearer attraction more
+		if(simrand(10)!=0) {
+			for(int i=0; i<8; i++) {
+				if(  koord_distance( k, pos ) < basis  ) {
+					break;
+				}
+				// retry once ...
+				gb = welt->get_random_ausflugsziel();
+				k = gb->get_pos().get_2d();
+			}
+		}
+		else {
+			for(int i=0; i<10; i++) {
+				// 1/10 go to land attraction
+				if(gb->get_tile()->get_besch()->get_extra() == 0) {
+					break;
+				}
+				// retry once ...
+				gb = welt->get_random_ausflugsziel();
+				k = gb->get_pos().get_2d();
+			}
+		}
+		return k;
 	}
 	else {
 		// if we reach here, at least a single town existes ...
 		const stadt_t* zielstadt = welt->get_random_stadt();
 
 		// we like nearer towns more
-		if(  koord_distance( zielstadt->pos, pos ) > 120  ) {
-			// retry once ...
-			zielstadt = welt->get_random_stadt();
+		if(simrand(4)!=0) {
+			for(int i=0; i<8; i++) {
+				if(  koord_distance( zielstadt->pos, pos ) < basis  ) {
+					break;
+				}
+				// retry once ...
+				zielstadt = welt->get_random_stadt();
+			}
+		}
+		else {
+			// 1/4 go to in this city
+			zielstadt = this;
 		}
 
 		// long distance traveller? => then we return
