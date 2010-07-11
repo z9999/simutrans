@@ -420,7 +420,7 @@ endif
 CCFLAGS  += $(CFLAGS)
 CXXFLAGS += $(CFLAGS)
 
-PROG ?= sim
+PROG ?= sim_test
 
 
 include common.mk
