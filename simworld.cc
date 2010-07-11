@@ -787,7 +787,7 @@ void karte_t::create_rivers( sint16 number )
 
 
 
-void karte_t::distribute_groundobjs_cities(int new_anzahl_staedte, sint16 old_x, sint16 old_y)
+void karte_t::distribute_groundobjs_cities(int new_anzahl_staedte, sint32 new_mittlere_einwohnerzahl, sint16 old_x, sint16 old_y)
 {
 DBG_DEBUG("karte_t::distribute_groundobjs_cities()","distributing rivers");
 	if(  umgebung_t::river_types>0  &&  einstellungen->get_river_number()>0  ) {
@@ -817,9 +817,9 @@ DBG_DEBUG("karte_t::distribute_groundobjs_cities()","prepare cities");
 		uint32 tbegin = dr_time();
 #endif
 		for(  int i=0;  i<new_anzahl_staedte;  i++  ) {
-//			int citizens=(int)(einstellungen->get_mittlere_einwohnerzahl()*0.9);
+//			int citizens=(int)(new_mittlere_einwohnerzahl*0.9);
 //			citizens = citizens/10+simrand(2*citizens+1);
-			int current_citicens = (2500l * einstellungen->get_mittlere_einwohnerzahl()) /(simrand(20000)+100);
+			int current_citicens = (2500l * new_mittlere_einwohnerzahl) /(simrand(20000)+100);
 			stadt_t* s = new stadt_t(spieler[1], (*pos)[i], current_citicens);
 DBG_DEBUG("karte_t::distribute_groundobjs_cities()","Erzeuge stadt %i with %ld inhabitants",i,(s->get_city_history_month())[HIST_CITICENS] );
 			stadt.append(s, s->get_einwohner(), 64);
@@ -1471,7 +1471,7 @@ void karte_t::enlarge_map(einstellungen_t* sets, sint8 *h_field)
 	// Resize marker_t:
 	marker.init(new_groesse_x, new_groesse_y);
 
-	distribute_groundobjs_cities(sets->get_anzahl_staedte(),old_x, old_y);
+	distribute_groundobjs_cities(sets->get_anzahl_staedte(), sets->get_mittlere_einwohnerzahl(), old_x, old_y);
 
 	// hausbauer_t::neue_karte(); <- this would reinit monuments! do not do this!
 	fabrikbauer_t::neue_karte( this );
@@ -4180,9 +4180,16 @@ DBG_DEBUG("karte_t::laden", "init %i cities",einstellungen->get_anzahl_staedte()
 		for (int y = 0; y < get_groesse_y(); y++) {
 			for (int x = 0; x < get_groesse_x(); x++) {
 				koord k(x,y);
-				if(access(x,y)->get_kartenboden()->get_typ()==grund_t::fundament) {
-					access(x,y)->get_kartenboden()->set_hoehe( max_hgt(k) );
-					access(x,y)->get_kartenboden()->set_grund_hang(hang_t::flach);
+				grund_t *gr1 = access(x, y)->get_kartenboden();
+				if(gr1->get_typ()==grund_t::fundament) {
+					gr1->set_hoehe( max_hgt(k) );
+					// get new grund
+					grund_t *gr2 = access(x, y)->get_kartenboden();
+					gr2->set_grund_hang(hang_t::flach);
+					// transfer object to on new grund
+					for(  int i=0;  i<gr1->get_top();  i++  ) {
+						gr1->obj_bei(i)->set_pos( gr2->get_pos() );
+					}
 				}
 			}
 		}
@@ -4226,7 +4233,14 @@ DBG_MESSAGE("karte_t::laden()", "%d factories loaded", fab_list.get_count());
 	for (weighted_vector_tpl<stadt_t*>::const_iterator i = stadt.begin(), end = stadt.end(); i != end; ++i) {
 		// old versions did not save factory connections
 		if(file->get_version()<99014) {
+			// this needs to avoid the first city to be connected to all town
+			sint32 temp_min = get_einstellungen()->get_factory_worker_minimum_towns();
+			sint32 temp_max = get_einstellungen()->get_factory_worker_maximum_towns();
+			get_einstellungen()->set_factory_worker_minimum_towns(0);
+			get_einstellungen()->set_factory_worker_maximum_towns(0x7FFFFFFF);
 			(*i)->verbinde_fabriken();
+			get_einstellungen()->set_factory_worker_minimum_towns(temp_min);
+			get_einstellungen()->set_factory_worker_maximum_towns(temp_max);
 		}
 		display_progress(x++, get_groesse_y() + 256 + stadt.get_count());
 	}
@@ -4398,11 +4412,12 @@ DBG_MESSAGE("karte_t::laden()", "%d ways loaded",weg_t::get_alle_wege().get_coun
 	}
 #ifdef DEBUG
 	DBG_MESSAGE("rebuild_destinations()","for all haltstellen_t took %ld ms", dr_time()-dt );
-#endif
 
-#if 0
 	// reroute goods for benchmarking
 	dt = dr_time();
+#endif
+	// reroute_goods needs long time in large game
+	// we must resolve all 'Error in routing' here.
 	for(  slist_tpl<halthandle_t>::const_iterator i=haltestelle_t::get_alle_haltestellen().begin(); i!=haltestelle_t::get_alle_haltestellen().end();  ++i  ) {
 		sint16 dummy = 0x7FFF;
 		if((hnr++%64)==0) {
@@ -4410,6 +4425,7 @@ DBG_MESSAGE("karte_t::laden()", "%d ways loaded",weg_t::get_alle_wege().get_coun
 		}
 		(*i)->reroute_goods(dummy);
 	}
+#ifdef DEBUG
 	DBG_MESSAGE("reroute_goods()","for all haltstellen_t took %ld ms", dr_time()-dt );
 #endif
 
