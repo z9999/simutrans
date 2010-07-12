@@ -133,6 +133,10 @@ sint32 gui_numberinput_t::get_next_value()
 		return (wrapping  &&  value==max_value) ? min_value : max_value;
 	}
 
+	if(event_get_last_control_shift()==1) {
+		return clamp( value+1, min_value, max_value );
+	}
+
 	switch( step_mode ) {
 		// automatic linear
 		case AUTOLINEAR:
@@ -175,7 +179,8 @@ sint32 gui_numberinput_t::get_next_value()
 		}
 		// default value is step size
 		default:
-			return clamp( ((value+step_mode)/step_mode)*step_mode, min_value, max_value );
+			sint32 delta = event_get_last_control_shift()==2 ? step_mode*10 : step_mode;
+			return clamp( ((value+delta)/step_mode)*step_mode, min_value, max_value );
 	}
 }
 
@@ -186,6 +191,10 @@ sint32 gui_numberinput_t::get_prev_value()
 	if(  value<=min_value  ) {
 		// turn over
 		return (wrapping  &&  value==min_value) ? max_value : min_value;
+	}
+
+	if(event_get_last_control_shift()==1) {
+		return clamp( value-1, min_value, max_value );
 	}
 
 	switch( step_mode ) {
@@ -230,7 +239,8 @@ sint32 gui_numberinput_t::get_prev_value()
 		}
 		// default value is step size
 		default:
-			return clamp( value-step_mode, min_value, max_value );
+			sint32 delta = event_get_last_control_shift()==2 ? step_mode*10 : step_mode;
+			return clamp( value-delta, min_value, max_value );
 	}
 }
 
