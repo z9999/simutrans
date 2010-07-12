@@ -154,6 +154,11 @@ public:
 	 */
 	static bool window_frame_active;
 
+	/*
+	 * hide help button
+	 */
+	static bool hide_help_button;
+
 	/**
 	* Produce more debug info ?
 	*

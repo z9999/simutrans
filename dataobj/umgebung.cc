@@ -55,6 +55,7 @@ bool umgebung_t::townhall_info;
 bool umgebung_t::single_info;
 bool umgebung_t::window_buttons_right;
 bool umgebung_t::window_frame_active;
+bool umgebung_t::hide_help_button;
 uint8 umgebung_t::verbose_debug;
 uint8 umgebung_t::default_sortmode;
 sint8 umgebung_t::default_mapmode;
@@ -114,6 +115,7 @@ void umgebung_t::init()
 
 	window_buttons_right = false;
 	window_frame_active = false;
+	hide_help_button = false;
 
 	// debug level (0: only fatal, 1: error, 2: warning, 3: alles
 	verbose_debug = 0;

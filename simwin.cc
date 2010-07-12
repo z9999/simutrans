@@ -612,7 +612,7 @@ void display_win(int win)
 	bool need_dragger = komp->get_resizemode() != gui_frame_t::no_resize;
 
 	// %HACK (Mathew Hounsell) So draw will know if gadget is needed.
-	wins[win].flags.help = ( komp->get_hilfe_datei() != NULL );
+	wins[win].flags.help = ( !umgebung_t::hide_help_button  &&  komp->get_hilfe_datei() != NULL );
 	win_draw_window_title(wins[win].pos,
 			gr,
 			titel_farbe,
@@ -870,7 +870,7 @@ bool check_pos_win(event_t *ev)
 				is_moving = -1;
 
 				// %HACK (Mathew Hounsell) So decode will know if gadget is needed.
-				wins[i].flags.help = ( wins[i].gui->get_hilfe_datei() != NULL );
+				wins[i].flags.help = ( !umgebung_t::hide_help_button  &&  wins[i].gui->get_hilfe_datei() != NULL );
 
 				// Where Was It ?
 				simwin_gadget_et code = decode_gadget_boxes( ( & wins[i].flags ), wins[i].pos.x + (REVERSE_GADGETS?0:wins[i].gui->get_fenstergroesse().x-20), x );
