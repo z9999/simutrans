@@ -137,9 +137,19 @@ sint32 gui_numberinput_t::get_next_value()
 		// automatic linear
 		case AUTOLINEAR:
 		{
-			sint64 diff = (sint64)max_value - (sint64)min_value;
-			sint32 one_percent = (sint32) (diff / 100l);
-			return clamp( value+max(1,one_percent), min_value, max_value );
+			int n = 0;
+			sint32 v = value;
+			while(abs(v)>=1000) {
+				v /= 10;
+				n++;
+			}
+			v=1;
+			while(n>0) {
+				v *= 10;
+				n--;
+			}
+			sint32 delta = event_get_last_control_shift()==2 ? v*10 : v;
+			return clamp( value+delta, min_value, max_value );
 		}
 		// power of 2
 		case POWER2:
@@ -182,9 +192,19 @@ sint32 gui_numberinput_t::get_prev_value()
 		// automatic linear
 		case AUTOLINEAR:
 		{
-			sint64 diff = (sint64)max_value - (sint64)min_value;
-			sint32 one_percent = (sint32) (diff / 100ll);
-			return clamp( value-max(1,one_percent), min_value, max_value );
+			int n = 0;
+			sint32 v = value;
+			while(abs(v)>=1000) {
+				v /= 10;
+				n++;
+			}
+			v=1;
+			while(n>0) {
+				v *= 10;
+				n--;
+			}
+			sint32 delta = event_get_last_control_shift()==2 ? v*10 : v;
+			return clamp( value-delta, min_value, max_value );
 		}
 		// power of 2
 		case POWER2:
