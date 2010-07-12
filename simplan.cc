@@ -410,33 +410,41 @@ void planquadrat_t::display_overlay(const sint16 xpos, const sint16 ypos, const 
 	// display station owner boxes
 	if(umgebung_t::station_coverage_show  &&  halt_list_count>0) {
 
+		// only transparent outline
+		image_id img = gr->get_bild();
+		if(img==IMG_LEER) {
+			// default image (since i.e. foundations do not have an image)
+			img = grund_besch_t::get_ground_tile( gr->get_disp_slope(), gr->get_disp_height() );
+		}
 		if(umgebung_t::use_transparency_station_coverage) {
-
-			// only transparent outline
-			image_id img = gr->get_bild();
-			if(img==IMG_LEER) {
-				// default image (since i.e. foundations do not have an image)
-				img = grund_besch_t::get_ground_tile( gr->get_disp_slope(), gr->get_disp_height() );
-			}
-
-			for(int halt_count = 0; halt_count < halt_list_count; halt_count++) {
-				const PLAYER_COLOR_VAL transparent = PLAYER_FLAG | OUTLINE_FLAG | (halt_list[halt_count]->get_besitzer()->get_player_color1() + 4);
-				display_img_blend( img, xpos, ypos, transparent | TRANSPARENT25_FLAG, 0, 0);
-			}
+			if(!umgebung_t::show_station_tile) {
+				for(int halt_count = 0; halt_count < halt_list_count; halt_count++) {
+					const PLAYER_COLOR_VAL transparent = PLAYER_FLAG | OUTLINE_FLAG | (halt_list[halt_count]->get_besitzer()->get_player_color1() + 4);
+					display_img_blend( img, xpos, ypos, transparent | TRANSPARENT25_FLAG, 0, 0);
+				}
 /*
 // unfourtunately, too expensive for display
-			// plot player outline colours - we always plot in order of players so that the order of the stations in halt_list
-			// doesn't affect the colour displayed [since blend(col1,blend(col2,screen)) != blend(col2,blend(col1,screen))]
-			for(int spieler_count = 0; spieler_count<MAX_PLAYER_COUNT; spieler_count++) {
-				spieler_t *display_player = gr->get_welt()->get_spieler(spieler_count);
-				const PLAYER_COLOR_VAL transparent = PLAYER_FLAG | OUTLINE_FLAG | (display_player->get_player_color1() * 4 + 4);
-				for(int halt_count = 0; halt_count < halt_list_count; halt_count++) {
-					if(halt_list[halt_count]->get_besitzer() == display_player) {
-						display_img_blend( img, xpos, ypos, transparent | TRANSPARENT25_FLAG, 0, 0);
+				// plot player outline colours - we always plot in order of players so that the order of the stations in halt_list
+				// doesn't affect the colour displayed [since blend(col1,blend(col2,screen)) != blend(col2,blend(col1,screen))]
+				for(int spieler_count = 0; spieler_count<MAX_PLAYER_COUNT; spieler_count++) {
+					spieler_t *display_player = gr->get_welt()->get_spieler(spieler_count);
+					const PLAYER_COLOR_VAL transparent = PLAYER_FLAG | OUTLINE_FLAG | (display_player->get_player_color1() * 4 + 4);
+					for(int halt_count = 0; halt_count < halt_list_count; halt_count++) {
+						if(halt_list[halt_count]->get_besitzer() == display_player) {
+							display_img_blend( img, xpos, ypos, transparent | TRANSPARENT25_FLAG, 0, 0);
+						}
 					}
 				}
-			}
 	*/
+			}
+			else {
+				// show halt tile too
+				halthandle_t halt = get_halt();
+				if(halt.is_bound()) {
+					const PLAYER_COLOR_VAL transparent = PLAYER_FLAG | OUTLINE_FLAG | (halt->get_besitzer()->get_player_color1() + 4);
+					display_img_blend( img, xpos, ypos, transparent | TRANSPARENT50_FLAG, 0, 0);
+				}
+			}
 		}
 		else {
 			const sint16 raster_tile_width = get_tile_raster_width();
@@ -446,9 +454,18 @@ void planquadrat_t::display_overlay(const sint16 xpos, const sint16 ypos, const 
 			const sint16 y=ypos+(raster_tile_width*3)/4-r - (gr->get_grund_hang()? tile_raster_scale_y(8,raster_tile_width): 0);
 			const bool kartenboden_dirty = gr->get_flag(grund_t::dirty);
 			const sint16 off = (raster_tile_width>>5);
-			// suitable start search
-			for(sint16 h=halt_list_count-1;  h>=0;  h--  ) {
-				display_fillbox_wh_clip(x - h * off, y + h * off, r, r, PLAYER_FLAG | (halt_list[h]->get_besitzer()->get_player_color1() + 4), kartenboden_dirty);
+			if(!umgebung_t::show_station_tile) {
+				// suitable start search
+				for(sint16 h=halt_list_count-1;  h>=0;  h--  ) {
+					display_fillbox_wh_clip(x - h * off, y + h * off, r, r, PLAYER_FLAG | (halt_list[h]->get_besitzer()->get_player_color1() + 4), kartenboden_dirty);
+				}
+			}
+			else {
+				// show halt tile too
+				halthandle_t halt = get_halt();
+				if(halt.is_bound()) {
+					display_fillbox_wh_clip(x, y, r, r, PLAYER_FLAG | (halt->get_besitzer()->get_player_color1() + 4), kartenboden_dirty);
+				}
 			}
 		}
 	}

@@ -3053,6 +3053,7 @@ const haus_besch_t *wkz_station_t::get_besch( sint8 &rotation ) const
 bool wkz_station_t::init( karte_t *welt, spieler_t * )
 {
 	sint8 rotation = -1;
+	win_set_static_tooltip( NULL );
 	const haus_besch_t *hb = get_besch( rotation );
 	if(  hb==NULL  ) {
 		return false;
@@ -3201,6 +3202,22 @@ const char *wkz_station_t::work( karte_t *welt, spieler_t *sp, koord3d pos )
 			dbg->fatal("wkz_station_t::work()","tool called for illegal besch \"%\"", default_param );
 	}
 	return msg;
+}
+
+char wkz_station_t::toolstring[256];
+const char *wkz_station_t::move( karte_t *welt, spieler_t *sp, uint16, koord3d p )
+{
+	win_set_static_tooltip( NULL );
+	if(umgebung_t::show_hover_station_name) {
+		const planquadrat_t *pl = welt->lookup(p.get_2d());
+		if(pl) {
+			halthandle_t halt = pl->get_halt();
+			if(  halt.is_bound()  ) {
+				sprintf(toolstring, "%s (%s)", halt->get_name(), halt->get_besitzer()->get_name() );
+				win_set_static_tooltip(toolstring);
+			}
+		}
+	}
 }
 
 

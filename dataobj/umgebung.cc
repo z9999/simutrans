@@ -40,6 +40,8 @@ bool umgebung_t::hide_trees;
 uint8 umgebung_t::hide_buildings;
 bool umgebung_t::use_transparency_station_coverage;
 uint8 umgebung_t::station_coverage_show;
+bool umgebung_t::show_station_tile;
+bool umgebung_t::show_hover_station_name;
 sint32  umgebung_t::show_names;
 sint32 umgebung_t::message_flags[4];
 bool umgebung_t::no_tree;
@@ -94,6 +96,8 @@ void umgebung_t::init()
 	/* station stuff */
 	use_transparency_station_coverage = true;
 	station_coverage_show = NOT_SHOWN_COVERAGE;
+	show_station_tile = false;
+	show_hover_station_name = false;
 
 	show_names = 3;
 

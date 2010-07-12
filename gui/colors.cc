@@ -41,8 +41,8 @@
 #define SEPERATE2 (HIDE_CITY_HOUSES+13)
 
 #define USE_TRANSPARENCY_STATIONS	(SEPERATE2+4)
-#define SHOW_STATION_COVERAGE			(USE_TRANSPARENCY_STATIONS+13)
-#define SHOW_STATION_SIGNS				(SHOW_STATION_COVERAGE+13)
+#define SHOW_STATION_TILE			(USE_TRANSPARENCY_STATIONS+13)
+#define SHOW_STATION_SIGNS				(SHOW_STATION_TILE+13)
 #define SHOW_STATION_GOODS				(SHOW_STATION_SIGNS+13)
 
 #define SEPERATE3	(SHOW_STATION_GOODS+13)
@@ -137,10 +137,6 @@ color_gui_t::color_gui_t(karte_t *welt) :
 	buttons[14].set_text("transparent station coverage");
 	buttons[14].pressed = umgebung_t::use_transparency_station_coverage;
 
-	buttons[15].set_pos( koord(10,SHOW_STATION_COVERAGE) );
-	buttons[15].set_typ(button_t::square_state);
-	buttons[15].set_text("show station coverage");
-
 	buttons[16].set_pos( koord(10,UNDERGROUND) );
 	buttons[16].set_typ(button_t::square_state);
 	buttons[16].set_text("underground mode");
@@ -176,6 +172,11 @@ color_gui_t::color_gui_t(karte_t *welt) :
 	buttons[1].set_pos( koord(RIGHT_WIDTH-10-10,CONVOI_TOOLTIPS) );
 	buttons[1].set_typ(button_t::arrowright);
 
+	// left right for show station coverage
+	buttons[2].set_pos( koord(10,SHOW_STATION_TILE) );
+	buttons[2].set_typ(button_t::arrowleft);
+	buttons[3].set_pos( koord(RIGHT_WIDTH-10-10,SHOW_STATION_TILE) );
+	buttons[3].set_typ(button_t::arrowright);
 	for(int i=0;  i<COLORS_MAX_BUTTONS;  i++ ) {
 		buttons[i].add_listener(this);
 		add_komponente( buttons+i );
@@ -206,6 +207,14 @@ bool color_gui_t::action_triggered( gui_action_creator_t *komp, value_t v)
 		umgebung_t::show_vehicle_states = (umgebung_t::show_vehicle_states+2)%3;
 	} else if((buttons+1)==komp) {
 		umgebung_t::show_vehicle_states = (umgebung_t::show_vehicle_states+1)%3;
+	} else if((buttons+2)==komp) {
+		bool temp = umgebung_t::show_station_tile;
+		umgebung_t::show_station_tile = (!temp && umgebung_t::station_coverage_show!=0) ? umgebung_t::show_station_tile : !umgebung_t::show_station_tile;
+		umgebung_t::station_coverage_show = (temp && umgebung_t::station_coverage_show!=0) ? umgebung_t::station_coverage_show : !umgebung_t::station_coverage_show;
+	} else if((buttons+3)==komp) {
+		bool temp = umgebung_t::show_station_tile;
+		umgebung_t::show_station_tile = (!temp && umgebung_t::station_coverage_show==0) ? umgebung_t::show_station_tile : !umgebung_t::show_station_tile;
+		umgebung_t::station_coverage_show = (!temp && umgebung_t::station_coverage_show!=0) ? umgebung_t::station_coverage_show : !umgebung_t::station_coverage_show;
 	} else if((buttons+6)==komp) {
 		buttons[6].pressed ^= 1;
 		umgebung_t::scroll_multi = -umgebung_t::scroll_multi;
@@ -232,8 +241,6 @@ bool color_gui_t::action_triggered( gui_action_creator_t *komp, value_t v)
 	} else if((buttons+14)==komp) {
 		umgebung_t::use_transparency_station_coverage = !umgebung_t::use_transparency_station_coverage;
 		buttons[14].pressed ^= 1;
-	} else if((buttons+15)==komp) {
-		umgebung_t::station_coverage_show = umgebung_t::station_coverage_show==0 ? 0xFF : 0;
 	} else if((buttons+16)==komp) {
 		// see simwerkz.cc::wkz_show_underground_t::init
 		grund_t::set_underground_mode(buttons[16].pressed ? grund_t::ugm_none : grund_t::ugm_all, inp_underground_level.get_value());
@@ -280,7 +287,6 @@ void color_gui_t::zeichnen(koord pos, koord gr)
 	buttons[7].pressed = welt->get_einstellungen()->get_show_pax();
 	buttons[8].pressed = welt->get_einstellungen()->get_random_pedestrians();
 	buttons[11].pressed = umgebung_t::hide_trees;
-	buttons[15].pressed = umgebung_t::station_coverage_show;
 	buttons[16].pressed = grund_t::underground_mode == grund_t::ugm_all;
 	buttons[17].pressed = grund_t::show_grid;
 	buttons[18].pressed = umgebung_t::show_names&1;
@@ -303,6 +309,9 @@ void color_gui_t::zeichnen(koord pos, koord gr)
 
 	const char *hhc = translator::translate( umgebung_t::hide_buildings==0 ? "no buildings hidden" : (umgebung_t::hide_buildings==1 ? "hide city building" : "hide all building") );
 	display_proportional_clip(x+10+16, y+HIDE_CITY_HOUSES+1, hhc, ALIGN_LEFT, COL_BLACK, true);
+
+	const char *ssc = translator::translate( umgebung_t::station_coverage_show==0 ? "hide station coverage" : (umgebung_t::show_station_tile==1 ? "show only station tile" : "show station coverage") );
+	display_proportional_clip(x+10+16, y+SHOW_STATION_TILE+1, ssc, ALIGN_LEFT, COL_BLACK, true);
 
 	const char *ctc = translator::translate( umgebung_t::show_vehicle_states==0 ? "convoi error tooltips" : (umgebung_t::show_vehicle_states==1 ? "convoi mouseover tooltips" : "all convoi tooltips") );
 	display_proportional_clip(x+10+16, y+CONVOI_TOOLTIPS+1, ctc, ALIGN_LEFT, COL_BLACK, true);

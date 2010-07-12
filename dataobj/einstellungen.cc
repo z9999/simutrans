@@ -620,6 +620,7 @@ void einstellungen_t::parse_simuconf( tabfile_t &simuconf, sint16 &disp_width, s
 
 	// display stuff
 	umgebung_t::show_names = contents.get_int("show_names", umgebung_t::show_names);
+	umgebung_t::show_hover_station_name = contents.get_int("show_hover_station_name", umgebung_t::show_hover_station_name);
 	umgebung_t::show_month = contents.get_int("show_month", umgebung_t::show_month);
 	umgebung_t::max_acceleration = contents.get_int("fast_forward", umgebung_t::max_acceleration);
 

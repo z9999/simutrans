@@ -323,8 +323,10 @@ public:
 	virtual image_id get_icon(spieler_t *) const;
 	const char *get_tooltip(spieler_t *);
 	bool init( karte_t *, spieler_t * );
+	bool exit( karte_t *w, spieler_t *s ) { win_set_static_tooltip( NULL ); return true; }
 	const char *check( karte_t *, spieler_t *, koord3d );
 	virtual const char *work( karte_t *, spieler_t *, koord3d );
+	virtual const char *move( karte_t *, spieler_t *, uint16 /* buttonstate */, koord3d );
 	virtual bool is_init_network_save() const { return true; }
 };
 
@@ -620,10 +622,16 @@ public:
 class wkz_show_coverage_t : public werkzeug_t {
 public:
 	wkz_show_coverage_t() : werkzeug_t() { id = WKZ_SHOW_COVERAGE | SIMPLE_TOOL; }
-	const char *get_tooltip(spieler_t *) { return translator::translate("show station coverage"); }
+	const char *get_tooltip(spieler_t *) {
+		return translator::translate(
+		umgebung_t::station_coverage_show == 0 ? "show station coverage" :
+		umgebung_t::show_station_tile ? "hide station coverage" : "show only station tile");
+	}
 	bool is_selected(karte_t *) const { return umgebung_t::station_coverage_show; }
 	bool init( karte_t *welt, spieler_t * ) {
-		umgebung_t::station_coverage_show = !umgebung_t::station_coverage_show;
+		bool temp = umgebung_t::show_station_tile;
+		umgebung_t::show_station_tile = (!temp && umgebung_t::station_coverage_show==0) ? umgebung_t::show_station_tile : !umgebung_t::show_station_tile;
+		umgebung_t::station_coverage_show = (!temp && umgebung_t::station_coverage_show!=0) ? umgebung_t::station_coverage_show : !umgebung_t::station_coverage_show;
 		welt->set_dirty();
 		return false;
 	}

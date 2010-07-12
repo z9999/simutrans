@@ -62,6 +62,8 @@ public:
 	*/
 	static bool use_transparency_station_coverage;
 	static uint8 station_coverage_show;
+	static bool show_station_tile;
+	static bool show_hover_station_name;
 	enum { NOT_SHOWN_COVERAGE=0, SHOW_MY_COVERAGE, SHOW_ALL_COVERAGE };
 
 	// use transparency to hide buildings and trees
