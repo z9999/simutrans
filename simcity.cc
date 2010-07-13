@@ -1745,6 +1745,11 @@ class bauplatz_mit_strasse_sucher_t: public bauplatz_sucher_t
 };
 
 
+// to avoid many monuments are built in the same place
+// this value will not be saved
+static stadt_t* last_monument_city = NULL;
+
+
 void stadt_t::check_bau_spezial(bool new_town)
 {
 	// touristenattraktion bauen
@@ -1772,7 +1777,7 @@ void stadt_t::check_bau_spezial(bool new_town)
 		}
 	}
 
-	if ((bev & 511) == 0) {
+	if ((bev & 511) == 0  &&  last_monument_city != this) {
 		// errect a monoment
 		besch = hausbauer_t::waehle_denkmal(welt->get_timeline_year_month());
 		if (besch) {
@@ -1822,6 +1827,7 @@ void stadt_t::check_bau_spezial(bool new_town)
 					const gebaeude_t* gb = hausbauer_t::baue(welt, besitzer_p, welt->lookup(best_pos + koord(1, 1))->get_kartenboden()->get_pos(), 0, besch);
 					hausbauer_t::denkmal_gebaut(besch);
 					add_gebaeude_to_stadt(gb);
+					last_monument_city = this;
 					// tell the player, if not during initialization
 					if (!new_town) {
 						char buf[256];
