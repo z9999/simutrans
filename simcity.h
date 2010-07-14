@@ -326,6 +326,7 @@ public:
 	uint32 get_buildings()  const { return buildings.get_count(); }
 	sint32 get_unemployed() const { return bev - arb; }
 	sint32 get_homeless()   const { return bev - won; }
+	uint16 get_median_building_level()   const { return (arb/20 + won/10) / get_buildings(); }
 
 	/**
 	 * Gibt den Namen der Stadt zurück.

@@ -87,6 +87,15 @@ static uint32 renovation_percentage = 12;
 static uint32 min_building_density = 25;
 
 /**
+ * median_building_level forbids to renovate by median value of city buildings
+ * _new is for new city. 3-7...10 might be good
+ *_default is for playing. player can set, if he/she don't like too many tall buildings
+ * @author z9999
+ */
+static uint16 median_building_level_new = 5;
+static uint16 median_building_level_default = 999;
+
+/**
  * add a new consumer every % people increase
  * @author prissi
  */
@@ -303,6 +312,8 @@ bool stadt_t::cityrules_init(const std::string &objfilename)
 	// to keep compatible with the typo, here both are ok
 	min_building_density = (uint32)contents.get_int("minimum_building_desity", 25);
 	min_building_density = (uint32)contents.get_int("minimum_building_density", min_building_density);
+	median_building_level_new = contents.get_int("median_building_level_new", 5);
+	median_building_level_default = contents.get_int("median_building_level_default", 999);
 	set_industry_increase( contents.get_int("industry_increase_every", 0) );
 
 	// init the building value tables
@@ -1336,6 +1347,9 @@ void stadt_t::calc_growth()
 }
 
 
+static uint16 median_building_level_test = 999;
+
+
 // does constructions ...
 void stadt_t::step_bau()
 {
@@ -1343,9 +1357,11 @@ void stadt_t::step_bau()
 	// since we use internall a finer value ...
 	const int	growth_step = (wachstum>>4);
 	wachstum &= 0x0F;
+	median_building_level_test = new_town ? median_building_level_new : median_building_level_default;
 
 	// Hajo: let city grow in steps of 1
 	// @author prissi: No growth without development
+	int retry = 0;
 	for (int n = 0; n < growth_step; n++) {
 		bev++; // Hajo: bevoelkerung wachsen lassen
 
@@ -1357,6 +1373,18 @@ void stadt_t::step_bau()
 		check_bau_rathaus(new_town);
 		check_bau_factory(new_town); // add industry? (not during creation)
 		INT_CHECK("simcity 275");
+
+		if(new_town  &&  bev * 2 - won - arb > 170) {
+			retry ++;
+			if(retry > 10) {
+				// there is few chances to be able to find good place
+				bev -= 50;
+				break;
+			}
+		}
+		else {
+			retry = 0;
+		}
 	}
 }
 
@@ -2129,14 +2157,14 @@ void stadt_t::baue_gebaeude(const koord k)
 		if (sum_gewerbe > sum_industrie  &&  sum_gewerbe > sum_wohnung) {
 			h = hausbauer_t::get_gewerbe(0, current_month, cl);
 			if (h != NULL) {
-				arb += h->get_level() * 20;
+				arb += (h->get_level() + 1) * 20;
 			}
 		}
 
 		if (h == NULL  &&  sum_industrie > sum_gewerbe  &&  sum_industrie > sum_wohnung) {
 			h = hausbauer_t::get_industrie(0, current_month, cl);
 			if (h != NULL) {
-				arb += h->get_level() * 20;
+				arb += (h->get_level() + 1) * 20;
 			}
 		}
 
@@ -2144,7 +2172,7 @@ void stadt_t::baue_gebaeude(const koord k)
 			h = hausbauer_t::get_wohnhaus(0, current_month, cl);
 			if (h != NULL) {
 				// will be aligned next to a street
-				won += h->get_level() * 10;
+				won += (h->get_level() + 1) * 10;
 			}
 		}
 
@@ -2368,9 +2396,9 @@ void stadt_t::renoviere_gebaeude(gebaeude_t* gb)
 		}
 
 		switch (alt_typ) {
-			case gebaeude_t::wohnung:   won -= level * 10; break;
-			case gebaeude_t::gewerbe:   arb -= level * 20; break;
-			case gebaeude_t::industrie: arb -= level * 20; break;
+			case gebaeude_t::wohnung:   won -= (level+1) * 10; break;
+			case gebaeude_t::gewerbe:   arb -= (level+1) * 20; break;
+			case gebaeude_t::industrie: arb -= (level+1) * 20; break;
 			default: break;
 		}
 
@@ -2380,9 +2408,9 @@ void stadt_t::renoviere_gebaeude(gebaeude_t* gb)
 		update_gebaeude_from_stadt(gb);
 
 		switch (will_haben) {
-			case gebaeude_t::wohnung:   won += h->get_level() * 10; break;
-			case gebaeude_t::gewerbe:   arb += h->get_level() * 20; break;
-			case gebaeude_t::industrie: arb += h->get_level() * 20; break;
+			case gebaeude_t::wohnung:   won += (h->get_level()+1) * 10; break;
+			case gebaeude_t::gewerbe:   arb += (h->get_level()+1) * 20; break;
+			case gebaeude_t::industrie: arb += (h->get_level()+1) * 20; break;
 			default: break;
 		}
 	}
@@ -2595,12 +2623,12 @@ void stadt_t::baue()
 	}
 
 	// renovation (only done when nothing matches a certain location
-	if (!buildings.empty()  &&  simrand(100) <= renovation_percentage) {
+	if (!buildings.empty()  &&  simrand(100) <= renovation_percentage  &&  get_median_building_level() < median_building_level_test) {
 		gebaeude_t* gb;
 		// try to find a public owned building
 		for(uint8 i=0; i<4; i++) {
 			gb = buildings[simrand(buildings.get_count())];
-			if(  spieler_t::check_owner(gb->get_besitzer(),NULL)  ) {
+			if(  spieler_t::check_owner(gb->get_besitzer(),NULL)  &&  !(gb->get_tile()->get_besch()->get_level() > buildings.get_count()) ) {
 				renoviere_gebaeude(gb);
 				break;
 			}
