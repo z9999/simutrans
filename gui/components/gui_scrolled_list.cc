@@ -12,6 +12,7 @@
 #include "../../simworld.h"
 #include "../../simgraph.h"
 #include "../../simcolor.h"
+#include "../../simwin.h"
 #include "../../utils/simstring.h"
 
 
@@ -24,6 +25,7 @@ int gui_scrolled_list_t::total_vertical_size() const
 
 
 gui_scrolled_list_t::gui_scrolled_list_t(enum type type) :
+	gui_komponente_t(true),
 	sb(scrollbar_t::vertical)
 {
 	this->type = type;
@@ -244,7 +246,7 @@ void gui_scrolled_list_t::zeichnen(koord pos)
 			if(i == selection) {
 				// the selection is grey on color
 				display_fillbox_wh_clip(x+3, ycum-1, w-5, 11, highlight_color, true);
-				display_proportional_clip(x+7, ycum, item->get_text(), ALIGN_LEFT, MN_GREY3, true);
+				display_proportional_clip(x+7, ycum, item->get_text(), ALIGN_LEFT, (win_get_focus()==this ? COL_WHITE : MN_GREY3), true);
 			}
 			else {
 				// normal text
