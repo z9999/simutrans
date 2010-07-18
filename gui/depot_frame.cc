@@ -45,6 +45,8 @@
 
 char depot_frame_t::no_line_text[128];	// contains the current translation of "<no line>"
 
+char depot_frame_t::name_filter_value[64] = "";
+
 static const char * engine_type_names [9] =
 {
 	"unknown",
@@ -63,6 +65,7 @@ bool  depot_frame_t::show_retired_vehicles = false;
 
 bool  depot_frame_t::show_all = true;
 
+bool  depot_frame_t::name_filter = false;
 
 depot_frame_t::depot_frame_t(depot_t* depot) :
 	gui_frame_t(txt_title, depot->get_besitzer()),
@@ -196,6 +199,12 @@ DBG_DEBUG("depot_frame_t::depot_frame_t()","get_max_convoi_length()=%i",depot->g
 	bt_veh_action.add_listener(this);
 	bt_veh_action.set_tooltip("Choose operation executed on clicking stored/new vehicles");
 	add_komponente(&bt_veh_action);
+
+	bt_name_filter.set_typ(button_t::square);
+	bt_name_filter.set_text("");
+	bt_name_filter.add_listener(this);
+	bt_name_filter.set_tooltip("Toggle name filter");
+	add_komponente(&bt_name_filter);
 
 	bt_obsolete.set_typ(button_t::square);
 	bt_obsolete.set_text("Show obsolete");
@@ -476,6 +485,15 @@ void depot_frame_t::layout(koord *gr)
 	bt_veh_action.set_pos(koord(TOTAL_WIDTH-ABUTTON_WIDTH, PANEL_VSTART + PANEL_HEIGHT + 14));
 	bt_veh_action.set_groesse(koord(ABUTTON_WIDTH, ABUTTON_HEIGHT));
 
+	bt_name_filter.set_pos(koord(4, PANEL_VSTART + PANEL_HEIGHT + 16 ));
+	bt_name_filter.pressed = name_filter;
+
+	name_filter_input.set_text(name_filter_value, 60);
+	name_filter_input.set_groesse(koord(120, 14));
+	name_filter_input.set_pos(koord(20, PANEL_VSTART + PANEL_HEIGHT + 16));
+	name_filter_input.add_listener(this);
+	add_komponente(&name_filter_input);
+
 	bt_show_all.set_pos(koord(TOTAL_WIDTH-(ABUTTON_WIDTH*5)/2, PANEL_VSTART + PANEL_HEIGHT + 4 ));
 	bt_show_all.pressed = show_all;
 
@@ -655,7 +673,10 @@ void depot_frame_t::build_vehicle_lists()
 					}
 				}
 				if(append) {
-					add_to_vehicle_list( info );
+					// name filter. Try to check both object name and translation name.
+					if( !name_filter ||  strstr(info->get_name(), name_filter_value)  ||  strstr(translator::translate(info->get_name()), name_filter_value)) {
+						add_to_vehicle_list( info );
+					}
 				}
 			}
 		}
@@ -928,6 +949,11 @@ bool depot_frame_t::action_triggered( gui_action_creator_t *komp,value_t p)
 			depot_t::update_all_win();
 		} else if(komp == &bt_show_all) {
 			show_all = (show_all==0);
+		} else if(komp == &bt_name_filter) {
+			name_filter = (name_filter==0);
+			depot_t::update_all_win();
+		} else if(komp == &name_filter_input) {
+			name_filter = true;
 			depot_t::update_all_win();
 		} else if(komp == &bt_veh_action) {
 			if(veh_action== va_sell) {
@@ -1114,6 +1140,7 @@ void depot_frame_t::zeichnen(koord pos, koord groesse)
 
 	bt_obsolete.pressed = show_retired_vehicles;	// otherwise the button would not show depressed
 	bt_show_all.pressed = show_all;	// otherwise the button would not show depressed
+	bt_name_filter.pressed = name_filter;	// otherwise the button would not show depressed
 
 	gui_frame_t::zeichnen(pos, groesse);
 

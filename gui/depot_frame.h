@@ -58,6 +58,10 @@ private:
 	*/
 	static bool show_all;
 
+	/* filter by name
+	*/
+	static bool name_filter;
+
 	/**
 	 * Gui elements
 	 * @author Volker Meyer
@@ -80,6 +84,10 @@ private:
 
 	button_t bt_obsolete;
 	button_t bt_show_all;
+	button_t bt_name_filter;
+
+	static char name_filter_value[64];
+    gui_textinput_t name_filter_input;
 
 	gui_tab_panel_t tabs;
 	gui_divider_t   div_tabbottom;
