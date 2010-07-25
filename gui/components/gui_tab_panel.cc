@@ -149,10 +149,6 @@ void gui_tab_panel_t::zeichnen(koord parent_pos)
 
 	display_fillbox_wh_clip(xpos, ypos+HEADER_VSIZE-1, 4, 1, COL_WHITE, true);
 
-	// do not draw outside
-	int xx = required_groesse.x>get_groesse().x ? get_groesse().x-22 : get_groesse().x; 
-	PUSH_CLIP(xpos, ypos, xx, ypos+HEADER_VSIZE);
-
 	int i=0;
 	for (slist_tpl<tab>::const_iterator iter = tabs.begin(), end = tabs.end(); iter != end; ++iter, ++i) {
 		if(  i<offset_tab  ) {
@@ -212,7 +208,7 @@ void gui_tab_panel_t::zeichnen(koord parent_pos)
 				const char* text = iter->title;
 				const int width = text ? proportional_string_width( text ) : IMG_WIDTH;
 
-				if(text_x < mx && text_x+width+8 > mx  && (required_groesse.x<=get_groesse().x || mx < right.get_pos().x-12)) {
+				if(text_x < mx && text_x+width+8 > mx) {
 					// tooltip or change
 					win_set_tooltip(get_maus_x() + 16, get_maus_y() - 16, iter->tooltip );
 					break;
@@ -222,7 +218,6 @@ void gui_tab_panel_t::zeichnen(koord parent_pos)
 			}
 		}
 	}
-	POP_CLIP();
 }
 
 
