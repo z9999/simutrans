@@ -400,8 +400,8 @@ void gui_textinput_t::display_with_cursor(koord offset, bool cursor_active, bool
 				const size_t end_pos = ::max(head_cursor_pos, tail_cursor_pos);
 				const KOORD_VAL start_offset = proportional_string_len_width(text, start_pos);
 				const KOORD_VAL highlight_width = proportional_string_len_width(text+start_pos, end_pos-start_pos);
-				display_fillbox_wh_clip(pos.x+offset.x+2-scroll_offset+start_offset, pos.y+offset.y+1, highlight_width, 11, COL_GREY2, true);
-				display_text_proportional_len_clip(pos.x+offset.x+2-scroll_offset+start_offset, pos.y+offset.y+1+(groesse.y-large_font_height)/2, text+start_pos, ALIGN_LEFT, COL_GREY5, end_pos-start_pos);
+				display_fillbox_wh_clip(pos.x+offset.x+2-scroll_offset+start_offset, pos.y+offset.y+1, highlight_width, 11, COL_BLUE, true);
+				display_text_proportional_len_clip(pos.x+offset.x+2-scroll_offset+start_offset, pos.y+offset.y+1+(groesse.y-large_font_height)/2, text+start_pos, ALIGN_LEFT, COL_GREY6, end_pos-start_pos);
 			}
 
 			// display blinking cursor
