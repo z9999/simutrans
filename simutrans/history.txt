@@ -64,6 +64,11 @@
 	FIX: waiting time cycles also on left button
 	ADD: (z9999+) limit size of toolsbars in simuconf.tab
 	FIX: (z9999+) loading old games before 88.00
+	CHANGE: forest settings moved to simuconf.tab
+	ADD: delay and duration of tooltip configurable in simuconf.tab
+	ADD: timeline for headquarters (pak-sets may need to be updated as the default intro date is 1900, default retire date is 2999)
+	ADD: blinking cursor, selectable text and clipboard functions for text input fields
+	ADD: industry increase and minimum city distance now also saved in savegame
 
 
 Release of 102.2.2 (r3131 on 8-Mar-2010):
@@ -1886,7 +1891,7 @@ Release of 87.01
 4-Nov-2005 (prissi)
 	FIX: loading old maps with obsolete docks
 	FIX: no route next to attraction should now have a more meaningful number (so you can better guess how much you have to transport)
-	FIX: mail from attractions and factories again 4x recieved mail
+	FIX: mail from attractions and factories again 4x received mail
 	CHANGE: some further small optimizations for faster drawing of dialoges
 	CHANGE: vehicles now sorted in depot by intro year and engine type
 3-Nov-2005 (mip)
@@ -6282,7 +6287,7 @@ You can use this version with the 0.81.35exp base package.
          - FIX: midi playlist displays message
                 "Musicplaying disabled/not available" if either no MIDI
                 files could be loaded or if the soundcard could not be
-                initialized succesfully
+                initialized successfully
          - FIX: Song name in playlist is updated if a new song starts
                 playing
 

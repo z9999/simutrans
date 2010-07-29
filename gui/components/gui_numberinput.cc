@@ -294,8 +294,11 @@ bool gui_numberinput_t::infowin_event(const event_t *ev)
 					call_textinp = min_value <0;
 					break;
 				case 1:		// allow Ctrl-A (select all text) to function
+				case 3:		// allow Ctrl-C (copy text to clipboard)
 				case 8:
 				case 9:		// allow text input to handle unfocus event
+				case 22:	// allow Ctrl-V (paste text from clipboard)
+				case 24:	// allow Ctrl-X (cut text and copy to clipboard)
 				case 127:
 				case '0':
 				case '1':
@@ -364,6 +367,6 @@ void gui_numberinput_t::zeichnen(koord offset)
 
 	if(getroffen( get_maus_x()-offset.x, get_maus_y()-offset.y )) {
 		sprintf( tooltip, translator::translate("enter a value between %i and %i"), min_value, max_value );
-		win_set_tooltip(get_maus_x() + 16, get_maus_y() - 16, tooltip );
+		win_set_tooltip(get_maus_x() + 16, new_offset.y + groesse.y + 12, tooltip, this);
 	}
 }

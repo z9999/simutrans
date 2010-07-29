@@ -415,8 +415,8 @@ bool button_t::infowin_event(const event_t *ev)
 	}
 
 	// Knightly : check if the initial click and the current mouse positions are within the button's boundary
-	const bool cxy_within_boundary = ( (ev->cx>=0 && ev->cx<get_groesse().x && ev->cy>=0 && ev->cy<get_groesse().y) ? true : false );
-	const bool mxy_within_boundary = ( (ev->mx>=0 && ev->mx<get_groesse().x && ev->my>=0 && ev->my<get_groesse().y) ? true : false );
+	bool const cxy_within_boundary = 0 <= ev->cx && ev->cx < get_groesse().x && 0 <= ev->cy && ev->cy < get_groesse().y;
+	bool const mxy_within_boundary = 0 <= ev->mx && ev->mx < get_groesse().x && 0 <= ev->my && ev->my < get_groesse().y;
 
 	// Knightly : update the button pressed state only when mouse positions are within boundary or when it is mouse release
 	if(  type<=STATE_MASK  &&  cxy_within_boundary  &&  (  mxy_within_boundary  ||  IS_LEFTRELEASE(ev)  )  ) {
@@ -461,11 +461,11 @@ void button_t::zeichnen(koord offset)
 		return;
 	}
 
-	int bx = offset.x + pos.x;
-	int by = offset.y + pos.y;
+	const int bx = offset.x + pos.x;
+	const int by = offset.y + pos.y;
 
-	int bw = groesse.x;
-	int bh = groesse.y;
+	const int bw = groesse.x;
+	const int bh = groesse.y;
 
 	switch (type&STATE_MASK) {
 
@@ -603,7 +603,7 @@ void button_t::zeichnen(koord offset)
 	}
 
 	if(translated_tooltip &&  getroffen( get_maus_x()-offset.x, get_maus_y()-offset.y )) {
-		win_set_tooltip(get_maus_x() + 16, get_maus_y() - 16, translated_tooltip );
+		win_set_tooltip(get_maus_x() + 16, by + bh + 12, translated_tooltip, this);
 	}
 }
 

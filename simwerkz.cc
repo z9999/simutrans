@@ -3884,14 +3884,7 @@ const char *wkz_link_factory_t::work( karte_t *welt, spieler_t *sp, koord3d pos 
  */
 const haus_besch_t *wkz_headquarter_t::next_level( spieler_t *sp )
 {
-	// assume no further headquarter level
-	const sint16 level = sp->get_headquarter_level();
-	for (vector_tpl<const haus_besch_t*>::const_iterator iter = hausbauer_t::headquarter.begin(), end = hausbauer_t::headquarter.end(); iter != end; ++iter) {
-		if ((*iter)->get_extra() == level) {
-			return *iter;
-		}
-	}
-	return NULL;
+	return hausbauer_t::get_headquarter(sp->get_headquarter_level(), sp->get_welt()->get_timeline_year_month());
 }
 
 const char *wkz_headquarter_t::get_tooltip( spieler_t *sp )
@@ -5001,7 +4994,7 @@ bool wkz_change_player_t::init( karte_t *welt, spieler_t *sp)
 		case 'a': // activate/deactivate AI
 			if(welt->get_spieler(id)  &&  welt->get_spieler(id)->get_ai_id()!=spieler_t::HUMAN) {
 				welt->get_spieler(id)->set_active(state);
-				welt->get_einstellungen()->set_player_active( id, welt->get_spieler(id)->is_active() );
+				welt->access_einstellungen()->set_player_active( id, welt->get_spieler(id)->is_active() );
 			}
 			break;
 		case 'f': // activate/deactivate freeplay
@@ -5009,7 +5002,7 @@ bool wkz_change_player_t::init( karte_t *welt, spieler_t *sp)
 				dbg->error( "wkz_change_player_t::init()", "Only public player can enable freeplay!" );
 			}
 			else {
-				welt->get_einstellungen()->set_freeplay( !welt->get_einstellungen()->is_freeplay() );
+				welt->access_einstellungen()->set_freeplay( !welt->get_einstellungen()->is_freeplay() );
 			}
 			break;
 	}

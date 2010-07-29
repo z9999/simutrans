@@ -141,7 +141,7 @@ bool ai_t::call_general_tool( int tool, koord k, const char *param )
 			dbg->message("ai_t::call_general_tool()","failed for tool %i at (%s) because of \"%s\"", tool, pos.get_str(), err );
 		}
 		else {
-			dbg->message("ai_t::call_general_tool()","not succesful for tool %i at (%s)", tool, pos.get_str() );
+			dbg->message("ai_t::call_general_tool()","not successful for tool %i at (%s)", tool, pos.get_str() );
 		}
 	}
 	werkzeug_t::general_tool[tool]->set_default_param(old_param);
@@ -326,13 +326,7 @@ void ai_t::set_marker( koord place, koord size )
 bool ai_t::built_update_headquarter()
 {
 	// find next level
-	const haus_besch_t* besch = NULL;
-	for(  vector_tpl<const haus_besch_t *>::const_iterator iter = hausbauer_t::headquarter.begin(), end = hausbauer_t::headquarter.end();  iter != end;  ++iter  ) {
-		if ((*iter)->get_extra() == get_headquarter_level()) {
-			besch = (*iter);
-			break;
-		}
-	}
+	const haus_besch_t* besch = hausbauer_t::get_headquarter(get_headquarter_level(), welt->get_timeline_year_month());
 	// is the a suitable one?
 	if(besch!=NULL) {
 		// cost is negative!

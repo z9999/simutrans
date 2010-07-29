@@ -86,7 +86,7 @@ bool gui_textinput_t::infowin_event(const event_t *ev)
 {
 	if(  ev->ev_class==EVENT_KEYBOARD  ) {
 		if(  text  ) {
-			const size_t len = strlen(text);
+			size_t len = strlen(text);
 
 			switch(ev->ev_code) {
 					// handled by container
@@ -103,6 +103,33 @@ bool gui_textinput_t::infowin_event(const event_t *ev)
 					if(  IS_CONTROL_PRESSED(ev)  ) {
 						head_cursor_pos = len;
 						tail_cursor_pos = 0;
+					}
+					break;
+				case 3:
+					// Knightly : if Ctrl-C -> copy selected text to clipboard
+					if(  IS_CONTROL_PRESSED(ev)  &&  head_cursor_pos!=tail_cursor_pos  ) {
+						const size_t start_pos = min(head_cursor_pos, tail_cursor_pos);
+						const size_t end_pos = ::max(head_cursor_pos, tail_cursor_pos);
+						dr_copy(text + start_pos, end_pos - start_pos);
+					}
+					break;
+				case 22:
+					// Knightly : if Ctrl-V -> paste selected text to cursor position
+					if(  IS_CONTROL_PRESSED(ev)  ) {
+						if(  remove_selection()  ) {
+							// recalculate text length after deleting selection
+							len = strlen(text);
+						}
+						tail_cursor_pos = ( head_cursor_pos += dr_paste(text + head_cursor_pos, max - len - 1) );
+					}
+					break;
+				case 24:
+					// Knightly : if Ctrl-X -> cut and copy selected text to clipboard
+					if(  IS_CONTROL_PRESSED(ev)  &&  head_cursor_pos!=tail_cursor_pos  ) {
+						const size_t start_pos = min(head_cursor_pos, tail_cursor_pos);
+						const size_t end_pos = ::max(head_cursor_pos, tail_cursor_pos);
+						dr_copy(text + start_pos, end_pos - start_pos);
+						remove_selection();
 					}
 					break;
 				case SIM_KEY_DOWN: // down arrow
@@ -217,6 +244,12 @@ bool gui_textinput_t::infowin_event(const event_t *ev)
 					}
 					// insert letters, numbers, and special characters
 
+					// Knightly : first check if it is necessary to remove selected text portion
+					if(  remove_selection()  ) {
+						// recalculate text length after deleting selection
+						len = strlen(text);
+					}
+
 					// test, if we have top convert letter
 					char letter[8];
 
@@ -257,9 +290,6 @@ bool gui_textinput_t::infowin_event(const event_t *ev)
 						// too many chars ...
 						break;
 					}
-
-					// Knightly : check if it is necessary to remove selected text portion
-					remove_selection();
 
 					// insert into text?
 					if (head_cursor_pos < len) {
