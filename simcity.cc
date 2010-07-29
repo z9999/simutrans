@@ -283,7 +283,6 @@ bool stadt_t::cityrules_init(const std::string &objfilename)
 	min_building_density = (uint32)contents.get_int("minimum_building_density", min_building_density);
 	median_building_level_new = contents.get_int("median_building_level_new", 5);
 	median_building_level_default = contents.get_int("median_building_level_default", 999);
-	set_industry_increase( contents.get_int("industry_increase_every", 0) );
 
 	// init the building value tables
 	ind_start_score = contents.get_int("ind_start_score", 0);
@@ -1605,7 +1604,7 @@ koord stadt_t::get_zufallspunkt() const
 koord stadt_t::finde_passagier_ziel(pax_zieltyp* will_return)
 {
 	const sint16 rand = simrand(100);
-	sint32 basis = max(max(70, get_minimum_city_distance()*2+6), (welt->get_groesse_x() + welt->get_groesse_y())>>3);
+	sint32 basis = max(max(70, welt->get_einstellungen()->get_minimum_city_distance()*2+6), (welt->get_groesse_x() + welt->get_groesse_y())>>3);
 
 	// about 1/3 are workers
 	if(  rand < welt->get_einstellungen()->get_factory_worker_percentage()  &&  arbeiterziele.get_sum_weight() > 0  ) {
