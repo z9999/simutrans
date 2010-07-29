@@ -376,11 +376,12 @@ int simu_main(int argc, char** argv)
 	}
 
 #ifdef __BEOS__
-	if(1) { // since BeOS only supports relative paths ...
+	if (1) // since BeOS only supports relative paths ...
 #else
 	// use current dir as basedir, else use program_dir
-	if (gimme_arg(argc, argv, "-use_workdir",0)) {
+	if (gimme_arg(argc, argv, "-use_workdir", 0))
 #endif
+	{
 		// save the current directories
 		getcwd(umgebung_t::program_dir, lengthof(umgebung_t::program_dir));
 #ifdef _WIN32
@@ -812,19 +813,14 @@ DBG_MESSAGE("simmain","loadgame file found at %s",buffer);
 		new_world = true;
 		sint32 old_autosave = umgebung_t::autosave;
 		umgebung_t::autosave = false;
-		einstellungen_t sets = umgebung_t::default_einstellungen;
+		einstellungen_t sets;
 		sets.set_default_climates();
 		sets.set_use_timeline( 1 );
-		sets.set_grundwasser( -2*Z_TILE_STEP );
-		sets.set_max_mountain_height( 160 );
-		sets.set_map_roughness( 0.6 );
 		sets.set_groesse(64,64);
 		sets.set_anzahl_staedte(1);
-		sets.set_mittlere_einwohnerzahl( 1600 );
 		sets.set_land_industry_chains(1);
 		sets.set_tourist_attractions(1);
 		sets.set_verkehr_level(7);
-		sets.set_karte_nummer( 33 );
 		welt->init(&sets,0);
 		//  start in June ...
 		intr_set(welt, view);
