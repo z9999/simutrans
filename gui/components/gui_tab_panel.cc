@@ -213,7 +213,7 @@ void gui_tab_panel_t::zeichnen(koord parent_pos)
 
 				if(text_x < mx && text_x+width+8 > mx  && (required_groesse.x<=get_groesse().x || mx < right.get_pos().x-12)) {
 					// tooltip or change
-					win_set_tooltip(get_maus_x() + 16, ypos + HEADER_VSIZE + 12, iter->tooltip, &(*iter));
+					win_set_tooltip(get_maus_x() + 16, ypos + HEADER_VSIZE + 12, iter->tooltip, &(*iter), this);
 					break;
 				}
 
