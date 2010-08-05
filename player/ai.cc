@@ -356,16 +356,17 @@ bool ai_t::built_update_headquarter()
 					place = ai_bauplatz_mit_strasse_sucher_t(welt).suche_platz(st->get_pos(), besch->get_b(), besch->get_h(), besch->get_allowed_climate_bits(), &is_rotate);
 				}
 			}
-			const char *err=NULL;
+			const char *err="No suitable ground!";
 			if(  place!=koord::invalid  ) {
 				err = werkzeug_t::general_tool[WKZ_HEADQUARTER]->work( welt, this, welt->lookup_kartenboden(place)->get_pos() );
 
-				// cathcing more errors
+				// catching more errors
 				if(  err==NULL  ) {
 					// tell the player
 					char buf[256];
 					sprintf(buf, translator::translate("%s s\nheadquarter now\nat (%i,%i)."), get_name(), place.x, place.y );
 					welt->get_message()->add_message(buf, place, message_t::ai, PLAYER_FLAG|player_nr, welt->lookup_kartenboden(place)->find<gebaeude_t>()->get_tile()->get_hintergrund(0,0,0) );
+					return true;
 				}
 			}
 			if(  place==koord::invalid  ||  err!=NULL  ) {
@@ -373,7 +374,7 @@ bool ai_t::built_update_headquarter()
 
 				dbg->warning( "ai_t::built_update_headquarter()", "HQ failed with : %s", translator::translate(err) );
 			}
-			return place != koord::invalid;
+			return false;
 		}
 
 	}
