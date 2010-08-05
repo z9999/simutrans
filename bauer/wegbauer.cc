@@ -787,7 +787,8 @@ bool wegbauer_t::is_allowed_step( const grund_t *from, const grund_t *to, long *
 		break;
 
 		case wasser:
-			ok = (to->ist_natur()  ||  to->ist_wasser()  ||  (to->hat_weg(water_wt)  &&  check_owner(to->get_weg(water_wt)->get_besitzer(),sp)));
+			const weg_t *sch=to->get_weg(water_wt);
+			ok = sch==NULL  ?  (!fundament  &&  !to->ist_wasser())  :  (to->ist_natur()  ||  to->ist_wasser()  ||  (to->hat_weg(water_wt)  &&  check_owner(to->get_weg(water_wt)->get_besitzer(),sp)));
 			// calculate costs
 			if(ok) {
 				*costs = to->ist_wasser()  ||  to->hat_weg(water_wt) ? welt->get_einstellungen()->way_count_straight : welt->get_einstellungen()->way_count_leaving_road;	// prefer water very much ...
